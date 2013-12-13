@@ -1,0 +1,30 @@
+application: charming-bolt-370
+version: 2
+runtime: python27
+api_version: 1
+threadsafe: no
+
+handlers:
+- url: /stylesheets
+  static_dir: stylesheets
+- url: /favicon\.ico
+  static_files: img/favicon.ico
+  upload: img/favicon.ico
+- url: /css
+  static_dir: css
+- url: /js
+  static_dir: js
+- url: /img
+  static_dir: img
+- url: /fonts
+  static_dir: fonts
+- url: /.*
+  script: main.py
+
+libraries:
+- name: webapp2
+  version: latest
+- name: jinja2
+  version: latest
+- name: PIL
+  version: latest
