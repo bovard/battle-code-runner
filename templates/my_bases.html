@@ -1,0 +1,20 @@
+{%extends "base.html"%}
+
+{%block title%}Clash or Next!{%endblock%}
+
+
+{% block extrastyle %}
+{% endblock %}
+
+{%block body%}
+
+{% for image, score in base_entries %}
+    <div class="row show-grid">
+        <div class="span0 pagination text-center center-block"><img width="90%" src="data:image/png;base64,{{ image }}"></div>
+    </div>
+    <div class="row show-grid">
+        <div class="text-center text-primary">{{ score }}% Nexted!</div>
+    </div>
+{% endfor %}
+
+{%endblock%}
