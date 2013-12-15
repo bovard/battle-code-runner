@@ -42,61 +42,7 @@ def display_base():
 
 @post('/')
 def vote_base():
-    if 'key' in request.forms.keys():
-        base = ndb.Key(urlsafe=request.forms.key).get()
-        logging.info("we have a key")
-        if 'clash' in request.forms.keys():
-            logging.debug("Clashed!")
-            base.clash += 1
-            base.flags = 0
-            base.put()
-            pass
-        elif 'next' in request.forms.keys():
-            logging.debug("Nexted!")
-            base.next += 1
-            base.flags = 0
-            base.put()
-            pass
-        elif 'flag' in request.forms.keys():
-            logging.debug("Flagged!")
-            base.flags += 1
-            if base.flags >= MAX_FLAGS_BEFORE_DELETION:
-                base.key.delete()
-            else:
-                base.put()
-            redirect('/?last={}'.format('tyvm'))
-        else:
-            logging.error("Did have a next, clash, or flag!")
-        logging.info(base.score)
-        percentage = int(math.floor(base.score * 100))
-
-        redirect('/?last={}'.format(percentage))
-    else:
-        logging.info("Diddn't find a key!")
-        redirect('/')
-
-
-@get('/base')
-def my_bases():
-    user = users.get_current_user()
-    if not user:
-        redirect(users.create_login_url(request.url))
-
-    bases = BaseEntry.query(ancestor=user_key(user)).order(-BaseEntry.score).fetch(10)
-
-    base_entries = []
-    for base in bases:
-        base_entries.append(
-            (base64.b64encode(base.image), int(math.floor(base.score * 100)))
-        )
-    template_values = {
-        'base_entries': base_entries,
-        'url': '/base'
-    }
-    if user:
-        template_values['user'] = True
-
-    return respond(JINJA_ENV.get_template('my_bases.html'), template_values)
+    redirect('/')
 
 
 @get('/upload')
@@ -196,18 +142,6 @@ def main():
     debug(False)
     app = bottle.app()
     run_wsgi_app(app)
-
-
-@get('/image/:img_id')
-def get_image(img_id):
-    base = ndb.Key(urlsafe=img_id).get()
-    if base.image:
-        logging.info("We have an image!")
-        response.headers['Content-Type'] = 'image/png'
-        response.body = base.image
-        return response
-    else:
-        abort(404, 'image not found')
 
 
 @error(403)

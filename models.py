@@ -1,22 +1,18 @@
 from google.appengine.ext import ndb
 
 
-class BaseEntry(ndb.Model):
-    author = ndb.UserProperty()
-    date = ndb.DateTimeProperty(auto_now_add=True)
-    image = ndb.BlobProperty(indexed=False)
-    blob_key = ndb.BlobKeyProperty()
-    clash = ndb.IntegerProperty(default=0)
-    next = ndb.IntegerProperty(default=0)
-    score = ndb.ComputedProperty(
-        lambda self: float(self.next + 1)/(self.next + self.clash + 2))
-    town_hall_level = ndb.IntegerProperty(default=1)
-    random = ndb.IntegerProperty()
-    flags = ndb.IntegerProperty(default=0)
-
-
 class Submission(ndb.Model):
     author = ndb.UserProperty()
     date = ndb.DateTimeProperty(auto_now_add=True)
     games_played = ndb.IntegerProperty(default=0)
     ranking = ndb.IntegerProperty(default=1400)
+    active = ndb.BooleanProperty(default=True)
+    files = ndb.BlobProperty()
+
+
+class Game(ndb.Model):
+    date = ndb.DateTimeProperty(auto_now_add=True)
+    home_player = ndb.UserProperty()
+    away_player = ndb.UserProperty()
+    winner = ndb.UserProperty()
+    game = ndb.BlobProperty()

@@ -1,5 +1,6 @@
 import math
 
+
 def calculate_new_elo(elo, opponent_elo, win):
     expected = _calc_expected(elo, opponent_elo)
     new_elo = _updated_elo(elo, expected, win)
@@ -9,8 +10,10 @@ def calculate_new_elo(elo, opponent_elo, win):
         new_elo = 100
     return new_elo
 
+
 def _calc_expected(elo, opponent_elo):
     return 1.0/(1.0 + 10.0 * (opponent_elo - elo)/400.0)
+
 
 def _updated_elo(elo, expected, win):
     won = 0
