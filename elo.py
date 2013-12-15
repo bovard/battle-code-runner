@@ -1,9 +1,12 @@
 import math
 
-
 def calculate_new_elo(elo, opponent_elo, win):
     expected = _calc_expected(elo, opponent_elo)
     new_elo = _updated_elo(elo, expected, win)
+
+    # enforce minimum elo
+    if new_elo < 100:
+        new_elo = 100
     return new_elo
 
 def _calc_expected(elo, opponent_elo):
@@ -13,4 +16,5 @@ def _updated_elo(elo, expected, win):
     won = 0
     if win:
         won = 1
-    return ((int) (math.floor(elo + 32 * (won - expected))))
+    return int(math.floor(elo + 32 * (won - expected)))
+

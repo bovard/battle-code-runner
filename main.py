@@ -14,7 +14,6 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from lib import bottle
 from lib.bottle import abort, post, get, request, error, debug, redirect, response
 
-from images import create_base_image
 from models import BaseEntry
 
 
@@ -31,67 +30,12 @@ def user_key(user):
 
 
 def get_random_base(town_hall_level=None):
-    logging.info("choosing a random base")
-    if town_hall_level:
-        town_hall_level = int(town_hall_level)
-
-    keys = []
-    seed = random.randrange(0, math.pow(2, 52) - 1)
-
-    # look for keys greater than
-    logging.info("Looking at town hall level {} with "
-                 "seed {}".format(town_hall_level, seed))
-    query = BaseEntry.query()
-    if town_hall_level:
-        query.filter(BaseEntry.town_hall_level == town_hall_level)
-    base_keys = query.filter(BaseEntry.random >= seed).fetch(10, keys_only=True)
-    for base_key in base_keys:
-        keys.append(base_key)
-    # look for keys less than
-    if not keys:
-        query = BaseEntry.query()
-        if town_hall_level:
-            query.filter(BaseEntry.town_hall_level == town_hall_level)
-        query.filter(BaseEntry.random < seed)
-        base_keys = query.fetch(10, keys_only=True)
-        for base_key in base_keys:
-            keys.append(base_key)
-
-    # if not keys, 404!
-    if not keys:
-        logging.info("Returning 404!!!")
-        return abort(404, "No town halls found!")
 
     return random.choice(keys).get()
 
 
 @get('/')
 def display_base():
-    logging.info("Displaying a base!")
-    template_values = {}
-    user = users.get_current_user()
-    if request.query.base:
-        # display the base
-        logging.info("provided a base!")
-        base = ndb.Key(urlsafe=request.query.base).get()
-    else:
-        # choose a random base
-        logging.info("Choosing a random base")
-        base = get_random_base(request.query.thl)
-
-    if not base:
-        logging.error("NO BASE")
-        abort(404, "No town halls found!")
-
-    if 'last' in request.query.keys():
-        template_values['last'] = request.query.last
-
-    template_values['base'] = base
-    template_values['image'] = base64.b64encode(base.image)
-    template_values['key'] = base.key.urlsafe()
-    template_values['url'] = '/'
-    if user:
-        template_values['user'] = True
 
     return respond(JINJA_ENV.get_template('base_display.html'), template_values)
 
