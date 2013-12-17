@@ -35,7 +35,10 @@ def get_random_base(town_hall_level=None):
 
 
 @get('/')
-def display_base():
+def display_recent_games():
+    user = users.get_current_user()
+    if not user:
+        redirect('/login')
 
     return respond(JINJA_ENV.get_template('base_display.html'), template_values)
 
