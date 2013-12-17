@@ -1,4 +1,5 @@
 import base64
+import datetime
 import logging
 import jinja2
 import math
@@ -14,7 +15,7 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from lib import bottle
 from lib.bottle import abort, post, get, request, error, debug, redirect, response
 
-from models import BaseEntry
+from models import Game, Submission
 
 
 SIZE = 1000000
@@ -29,16 +30,43 @@ def user_key(user):
     return ndb.Key('User', user.user_id())
 
 
-def get_random_base(town_hall_level=None):
 
-    return random.choice(keys).get()
+def _get_user():
+    user = users.get_current_user()
+    if not user:
+        redirect('/login')
+    return user
+
+
+
+@get('/game/:game_id')
+def display_game(game_id):
+    game = ndb.Key(urlsafe=game_id).get()
+    if game:
+        logging.info("We have an game!")
+        response.headers['Content-Type'] = 'application/octet-stream'
+        response.headers['Content-Disposition'] = 'attachment; filename="{}.txt"'.format(game_id)
+        response.body = game.game_file
+        return response
+    else:
+        abort(404, 'game not found')
 
 
 @get('/')
 def display_recent_games():
-    user = users.get_current_user()
-    if not user:
-        redirect('/login')
+    user = _get_user()
+
+    games = Game.query().filter(Game.date < datetime.datetime.now()).fetch(100)
+
+    entries = []
+    for game in games:
+        entries.append([game, game.key.urlsafe()])
+
+
+    template_values = {
+
+    }
+
 
     return respond(JINJA_ENV.get_template('base_display.html'), template_values)
 

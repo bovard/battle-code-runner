@@ -15,4 +15,4 @@ class Game(ndb.Model):
     home_player = ndb.UserProperty()
     away_player = ndb.UserProperty()
     winner = ndb.UserProperty()
-    game = ndb.BlobProperty()
+    game_file = ndb.BlobProperty()
