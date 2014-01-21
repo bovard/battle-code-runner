@@ -168,7 +168,7 @@ def recompute_elos():
         _update_elo_with_teams(team_lookup[game.team_a], team_lookup[game.team_b], game.winner)
 
     logging.info('putting teams')
-    ndb.put_multi(team_keys)
+    ndb.put_multi(teams)
     logging.info('done')
 
 
@@ -192,8 +192,8 @@ def display_teams():
     for team in teams:
         data_list.append(_get_team_win_loss(team))
 
-    data_list.sort(key=lambda data: data[4])
-    data_list.reverse()
+    #data_list.sort(key=lambda data: data[4])
+    #data_list.reverse()
 
     template_values = {
         'headers': ['Team', 'ELO', 'Games', 'Wins', 'Percentage'],
