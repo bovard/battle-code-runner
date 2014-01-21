@@ -120,13 +120,16 @@ def _get_team_win_loss(team):
     per = round(100 * float(win_count)/game_count)
     return [_get_team_name_link(team.name), team.elo, game_count, win_count, per]
 
+
 @get('/teams/')
 def display_teams():
-
     teams = Team.query().order(-Team.elo, Team.name).fetch(100)
     data_list = []
     for team in teams:
         data_list.append(_get_team_win_loss(team))
+
+    data_list.sort(key=lambda data: data[4])
+    data_list.reverse()
 
     template_values = {
         'headers': ['Team', 'ELO', 'Games', 'Wins', 'Percentage'],
