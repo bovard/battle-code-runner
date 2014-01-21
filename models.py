@@ -28,4 +28,4 @@ class Game(ndb.Model):
 
 class Team(ndb.Model):
     name = ndb.StringProperty()
-    elo = ndb.IntegerProperty(default=1600)
+    elo = ndb.IntegerProperty(default=1400)

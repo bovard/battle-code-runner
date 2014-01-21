@@ -6,6 +6,7 @@ import os
 
 
 from google.appengine.ext.webapp.util import run_wsgi_app
+from google.appengine.ext import ndb
 
 
 from lib import bottle
@@ -42,6 +43,13 @@ def _create_or_get_team(team_name):
         team = Team(name = team_name)
     logging.info('returning {}'.format(team))
     return team
+
+
+def _update_elo_with_teams(team_a, team_b, winner):
+    team_a_elo = team_a.elo
+    team_b_elo = team_b.elo
+    team_a.elo = calculate_new_elo(team_a_elo, team_b_elo, winner == team_a.name)
+    team_b.elo = calculate_new_elo(team_b_elo, team_a_elo, winner == team_b.name)
 
 
 def _create_and_save_game(team_a, team_b, map, winner, round):
@@ -122,6 +130,48 @@ def display_team():
 
     return respond(JINJA_ENV.get_template('data_view.html'), template_values)
 
+
+@get('/delete_team/')
+def delete_team():
+    team_name = request.query.get('team')
+    team = Team.query().filter(Team.name == team_name).get()
+    to_delete = []
+    if team:
+        to_delete.append(team.key)
+
+    gamesA = Game.query().filter(Game.team_a == team_name)
+    for game in gamesA:
+        to_delete.append(game.key)
+
+    gamesB = Game.query().filter(Game.team_b == team_name)
+    for game in gamesB:
+        to_delete.append(game.key)
+
+    logging.info('about to delete {} obj'.format(len(to_delete)))
+    ndb.delete_multi(to_delete)
+
+
+@get('/recompute/')
+def recompute_elos():
+    logging.info("fetching teams and making lookup")
+    teams = Team.query().fetch(100)
+    team_lookup = {}
+    team_keys = []
+    for team in teams:
+        team_keys.append(team.key)
+        team.elo = 1400
+        team_lookup[team.name] = team
+
+    logging.info('interating through games')
+    games = Game.query()
+    for game in games:
+        _update_elo_with_teams(team_lookup[game.team_a], team_lookup[game.team_b], game.winner)
+
+    logging.info('putting teams')
+    ndb.put_multi(team_keys)
+    logging.info('done')
+
+
 def _get_team_name_link(name):
     return '<a href=/team/?team={}>{}</a>'.format(name, name)
 
@@ -176,7 +226,7 @@ def respond(template_file, params):
 
 
 def main():
-    debug(False)
+    debug(True)
     app = bottle.app()
     run_wsgi_app(app)
 
