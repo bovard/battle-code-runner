@@ -15,6 +15,8 @@ from models import Game, Team
 from elo import calculate_new_elo
 
 
+MAPS = ['backdoor.xml', 'bakedpotato.xml', 'blocky.xml', 'castles.xml', 'desolation.xml', 'divide.xml', 'donut.xml', 'flagsoftheworld.xml', 'flytrap.xml', 'friendly.xml', 'fuzzy.xml', 'itsatrap.xml', 'magnetism.xml', 'meander.xml', 'neighbors.xml', 'onramp.xml', 'overcast.xml', 'reticle.xml', 'rushlane.xml', 'siege.xml', 'smiles.xml', 'steamedbuns.xml', 'stitch.xml', 'sweetspot.xml', 'temple.xml', 'terra.xml', 'traffic.xml', 'troll.xxl', 'valve.xml', 'ventilation.xml']
+
 
 JINJA_ENV = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__) + '/templates'),
@@ -92,6 +94,16 @@ def save_game():
     if not game:
         _create_and_save_game(team_a, team_b, map, winner, round)
 
+def _get_team_map_win_loss(team, map):
+    team_a_count = Game.query().filter(Game.map == map).filter(Game.team_a == team.name).count()
+    team_b_count = Game.query().filter(Game.map == map).filter(Game.team_b == team.name).count()
+    win_count = Game.query().filter(Game.map == map).filter(Game.winner == team.name).count()
+    game_count = team_b_count + team_a_count
+    per = 0 if not game_count else round(100 * float(win_count)/game_count)
+    return [map, game_count, win_count, per]
+
+
+
 @get('/team/')
 def display_team():
     team_name = request.query.get('team')
@@ -99,11 +111,13 @@ def display_team():
     if not team:
         abort(404, 'team not found')
 
-
+    data_list = []
+    for map in MAPS:
+        data_list.append(_get_team_map_win_loss(team, map))
 
     template_values = {
-        'headers': ['Team', 'ELO', 'Games', 'Wins', 'Percentage'],
-        'data_list': [_get_team_win_loss(team)]
+        'headers': ['Map', 'Games', 'Wins', 'Percentage'],
+        'data_list': data_list
     }
 
     return respond(JINJA_ENV.get_template('data_view.html'), template_values)
