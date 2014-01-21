@@ -1,4 +1,5 @@
 import logging
+import math
 import jinja2
 import json
 import os
@@ -90,6 +91,28 @@ def save_game():
     game = _get_game(team_a, team_b, map)
     if not game:
         _create_and_save_game(team_a, team_b, map, winner, round)
+
+@get('/team/')
+def display_team():
+    team_name = request.query.get('team')
+    team = Team.query().filter(Team.name == team_name).get()
+    if not team:
+        abort(404, 'team not found')
+
+    team_a_count = Game.query().filter(Game.team_a == team_name).count()
+    team_b_count = Game.query().filter(Game.team_b == team_name).count()
+    game_count = team_b_count + team_a_count
+    win_count = Game.query().filter(Game.winner == team_name).count()
+    per = round(100 * float(win_count)/game_count)
+
+    template_values = {
+        'team': team,
+        'games': game_count,
+        'wins': win_count,
+        'percentage': per
+    }
+
+    return respond(JINJA_ENV.get_template('display_one_team.html'), template_values)
 
 
 @get('/')

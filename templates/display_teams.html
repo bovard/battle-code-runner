@@ -20,7 +20,7 @@
 {% for team in teams %}
     <div class="row">
         <div class="col-xs-4 col-sm-4 col-md-4">
-            <div class="text-center">{{ team.name }}</div>
+            <div class="text-center"><a href={{"/team/?team=%s" % team.name}}>{{ team.name }}</a></div>
         </div>
         <div class="col-xs-4 col-sm-4 col-md-4">
             <div class="text-center">{{ team.elo }}</div>

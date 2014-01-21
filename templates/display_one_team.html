@@ -1,0 +1,49 @@
+{%extends "base.html"%}
+
+{%block title%}Stats!{%endblock%}
+
+
+{% block extrastyle %}
+{% endblock %}
+
+{%block body%}
+
+<div class="row">
+    <div class="col-xs-2 col-sm-2 col-md-2">
+        <div class="text-center text-primary">Team</div>
+    </div>
+    <div class="col-xs-4 col-sm-2 col-md-2">
+        <div class="text-center text-primary">ELO</div>
+    </div>
+    <div class="col-xs-2 col-sm-2 col-md-2">
+        <div class="text-center text-primary">Wins</div>
+    </div>
+    <div class="col-xs-2 col-sm-2 col-md-2">
+        <div class="text-center text-primary">Games</div>
+    </div>
+    <div class="col-xs-2 col-sm-2 col-md-2">
+        <div class="text-center text-primary">%</div>
+    </div>
+
+</div>
+<div class="row">
+    <div class="col-xs-2 col-sm-2 col-md-2">
+        <div class="text-center">{{team.name}}</div>
+    </div>
+    <div class="col-xs-4 col-sm-2 col-md-2">
+        <div class="text-center">{{team.elo}}</div>
+    </div>
+    <div class="col-xs-2 col-sm-2 col-md-2">
+        <div class="text-center">{{wins}}</div>
+    </div>
+    <div class="col-xs-2 col-sm-2 col-md-2">
+        <div class="text-center">{{games}}</div>
+    </div>
+    <div class="col-xs-2 col-sm-2 col-md-2">
+        <div class="text-center">{{percentage}}%</div>
+    </div>
+
+</div>
+
+
+{%endblock%}
