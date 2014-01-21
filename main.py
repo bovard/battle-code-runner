@@ -90,14 +90,13 @@ def save_game():
 @get('/')
 def display_teams():
 
-    teams = Team.query().order(Team.elo, Team.name)
+    teams = Team.query().order(Team.elo, Team.name).fetch(100)
 
     template_values = {
         teams: teams
     }
 
-
-    return respond(JINJA_ENV.get_template('base_display.html'), template_values)
+    return respond(JINJA_ENV.get_template('display_teams.html'), template_values)
 
 
 def respond(template_file, params):
