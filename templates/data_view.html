@@ -1,0 +1,33 @@
+
+{%extends "base.html"%}
+
+{%block title%}Stats!{%endblock%}
+
+
+{% block extrastyle %}
+{% endblock %}
+
+{%block body%}
+
+<div class="row">
+{% for header in headers %}
+
+    <div class="col-xs-1 col-sm-1 col-md-1">
+        <div class="text-center text-primary">{{header}}</div>
+    </div>
+
+{% endfor %}
+</div>
+{% for data_row in data_list %}
+    <div class="row">
+    {% for data in data_row %}
+
+        <div class="col-xs-1 col-sm-1 col-md-1">
+            <div class="text-center">{{ data }}</div>
+        </div>
+
+
+    {% endfor %}
+    </div>
+{% endfor %}
+{%endblock%}

@@ -99,20 +99,40 @@ def display_team():
     if not team:
         abort(404, 'team not found')
 
-    team_a_count = Game.query().filter(Game.team_a == team_name).count()
-    team_b_count = Game.query().filter(Game.team_b == team_name).count()
-    game_count = team_b_count + team_a_count
-    win_count = Game.query().filter(Game.winner == team_name).count()
-    per = round(100 * float(win_count)/game_count)
+
 
     template_values = {
-        'team': team,
-        'games': game_count,
-        'wins': win_count,
-        'percentage': per
+        'headers': ['Team', 'ELO', 'Games', 'Wins', 'Percentage'],
+        'data_list': [_get_team_win_loss(team)]
     }
 
-    return respond(JINJA_ENV.get_template('display_one_team.html'), template_values)
+    return respond(JINJA_ENV.get_template('data_view.html'), template_values)
+
+def _get_team_name_link(name):
+    return '<a href=/team/?team={}>{}</a>'.format(name, name)
+
+
+def _get_team_win_loss(team):
+    team_a_count = Game.query().filter(Game.team_a == team.name).count()
+    team_b_count = Game.query().filter(Game.team_b == team.name).count()
+    game_count = team_b_count + team_a_count
+    win_count = Game.query().filter(Game.winner == team.name).count()
+    per = round(100 * float(win_count)/game_count)
+    return [_get_team_name_link(team.name), team.elo, game_count, win_count, per]
+
+@get('/teams/')
+def display_teams():
+
+    teams = Team.query().order(-Team.elo, Team.name).fetch(100)
+    data_list = []
+    for team in teams:
+        data_list.append(_get_team_win_loss(team))
+
+    template_values = {
+        'headers': ['Team', 'ELO', 'Games', 'Wins', 'Percentage'],
+        'data_list': data_list
+    }
+    return respond(JINJA_ENV.get_template('data_view.html'), template_values)
 
 
 @get('/')
@@ -120,11 +140,17 @@ def display_teams():
 
     teams = Team.query().order(-Team.elo, Team.name).fetch(100)
 
+    data_list = []
+    for team in teams:
+        data_list.append([_get_team_name_link(team.name), team.elo])
+
     template_values = {
-        'teams': teams
+        'headers': ['Team', 'ELO'],
+        'data_list': data_list
     }
 
-    return respond(JINJA_ENV.get_template('display_teams.html'), template_values)
+
+    return respond(JINJA_ENV.get_template('data_view.html'), template_values)
 
 
 def respond(template_file, params):
