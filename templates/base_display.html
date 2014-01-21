@@ -1,44 +1,25 @@
 {%extends "base.html"%}
 
-{%block title%}Clash or Next!{%endblock%}
+{%block title%}Stats!{%endblock%}
 
 
 {% block extrastyle %}
 {% endblock %}
 
 {%block body%}
-<div class="row">
-    <div class="span12 pagination text-center center-block">
-        <img width="90%" src="data:image/png;base64,{{ image }}">
+
+
+{% for team in teams %}
+    <div class="row">
+        <div class="col-xs-4 col-sm-4 col-md-4">
+            <div class="text-center text-primary">{{ team.name }}</div>
+        </div>
+        <div class="col-xs-4 col-sm-4 col-md-4">
+            <div class="text-center text-primary">{{ team.elo }}</div>
+        </div>
+
     </div>
-</div>
-<div class="row">
-    <div class="col-xs-4 col-sm-4 col-md-1">
-        <form action="/" method="post">
-            <button name="clash" class="btn btn-danger btn-lg" type="submit">Clash</button>
-            <input type="hidden" name="key" value="{{ key }}">
-        </form>
-    </div>
-    <div class="col-xs-4 col-sm-4 col-md-2 col-md-offset-4">
-        <form action="/" method="post" class="text-center">
-            <button name="flag" class="btn btn-danger" type="submit"><i class="glyphicon glyphicon-flag"></i></button>
-            <input type="hidden" name="key" value="{{ key }}">
-        </form>
-    </div>
-    <div class="col-xs-4 col-sm-4 col-md-1 col-md-offset-4">
-        <form action="/" method="post" class="text-center">
-            <button name="next"  class="btn btn-success btn-lg" type="submit">Next</button>
-            <input type="hidden" name="key" value="{{ key }}">
-        </form>
-    </div>
-</div>
-<div class="row">
-    <div class="col-xs-12 col-sm-12">
-        {% if last and last != 'tyvm' %}
-            <div class="text-center text-primary">Last Base {{ last }}% Nexted!</div>
-        {% elif last %}
-            <div class="text-center text-primary">We'll look into it, thank you!</div>
-        {% endif %}
-    </div>
-</div>
+
+{% endfor %}
+
 {%endblock%}

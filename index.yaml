@@ -10,13 +10,4 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
-- kind: BaseEntry
-  properties:
-  - name: town_hall_level
-  - name: random
 
-- kind: BaseEntry
-  ancestor: yes
-  properties:
-  - name: score
-    direction: desc

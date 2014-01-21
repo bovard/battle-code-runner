@@ -15,153 +15,89 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from lib import bottle
 from lib.bottle import abort, post, get, request, error, debug, redirect, response
 
-from models import Game, Submission
+from models import Game, Team
+from elo import calculate_new_elo
 
 
-SIZE = 1000000
-MAX_FLAGS_BEFORE_DELETION = 3
 
 JINJA_ENV = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__) + '/templates'),
     extensions=['jinja2.ext.autoescape'])
 
+def _get_game(team_a, team_b, map):
+    games = Game.query().filter(Game.team_a, team_a).filter(Game.team_b, team_b).filter(Game.map, map).fetch(10)
+    if not games.length:
+        return None
 
-def user_key(user):
-    return ndb.Key('User', user.user_id())
+    if games.length == 1:
+        return games[0]
+
+    if games.length > 1:
+        logging.error("Found more than 1 game for {} vs {} on {}".format(team_a, team_b, map))
+        return games[0]
+
+def _create_or_get_team(team_name):
+    team = Team.query(Team.name, team_name).get()
+    if not team:
+        team = Team(name = team_name)
+    return team
 
 
+def _create_and_save_game(team_a, team_b, map, winner, round):
+    team_a_team = _create_or_get_team(team_a)
+    team_b_team = _create_or_get_team(team_b)
+    team_a_elo = team_a_team.elo
+    team_b_elo = team_b_team.elo
+    team_a_team.elo = calculate_new_elo(team_a_elo, team_b_elo, winner == team_a)
+    team_b_team.elo = calculate_new_elo(team_b_elo, team_a_elo, winner == team_b)
+    game = Game(
+        team_a=team_a,
+        team_b=team_b,
+        winner=winner,
+        round=round,
+        map=map
+    )
+    ndb.put_multi([game, team_a_team, team_a_team])
 
-def _get_user():
-    user = users.get_current_user()
-    if not user:
-        redirect('/login')
-    return user
 
+@get('/game/')
+def display_game():
+    team_a = request.query.team_a
+    team_b = request.query.team_b
+    map = request.query.map
 
+    game = _get_game(team_a, team_b, map)
 
-@get('/game/:game_id')
-def display_game(game_id):
-    game = ndb.Key(urlsafe=game_id).get()
     if game:
-        logging.info("We have an game!")
-        response.headers['Content-Type'] = 'application/octet-stream'
-        response.headers['Content-Disposition'] = 'attachment; filename="{}.txt"'.format(game_id)
-        response.body = game.game_file
+        response.headers['Content-Type'] = 'application/json'
+        response.body = game.to_json()
         return response
     else:
         abort(404, 'game not found')
 
+@post('/game/')
+def save_game():
+    team_a = request.query.get(Game.TEAM_A)
+    team_b = request.query.get(Game.TEAM_B)
+    map = request.query.get(Game.MAP)
+    winner = request.query.get(Game.WINNER)
+    round = request.query.get(Game.ROUND)
+    game = _get_game(team_a, team_b, map)
+    if not game:
+        _create_and_save_game(team_a, team_b, map, winner, round)
+
 
 @get('/')
-def display_recent_games():
-    user = _get_user()
+def display_teams():
 
-    games = Game.query().filter(Game.date < datetime.datetime.now()).fetch(100)
-
-    entries = []
-    for game in games:
-        entries.append([game, game.key.urlsafe()])
-
+    teams = Team.query().order(Team.elo, Team.name)
 
     template_values = {
-
+        teams: teams
     }
 
 
     return respond(JINJA_ENV.get_template('base_display.html'), template_values)
-
-
-@post('/')
-def vote_base():
-    redirect('/')
-
-
-@get('/upload')
-def upload_base():
-    logging.info("Ready to upload a base!")
-    user = users.get_current_user()
-
-    template_values = {
-        'user': True,
-        'url': '/upload'
-    }
-
-    # if there isn't a user re-direct to the login screen
-    if not user:
-        template_values['user'] = False
-
-    if request.query.ni:
-        template_values['no_image'] = True
-    elif request.query.tl:
-        template_values['too_large'] = True
-    elif request.query.nl:
-        template_values['no_level'] = True
-
-    return respond(JINJA_ENV.get_template('upload.html'), template_values)
-
-
-@post('/upload')
-def create_base():
-    logging.info("Creating a new base")
-
-    # make sure all the information is included
-    user = users.get_current_user()
-
-    base_img = request.files.get('img')
-    if base_img:
-        logging.info('have an image!')
-    else:
-        redirect('/upload?ni=True')
-
-    if request.forms.get('level'):
-        logging.info('have a level')
-    if request.forms.get('level') == 'Select':
-        redirect('/upload?nl=True')
-
-    if user:
-        base_entry = BaseEntry(parent=user_key(user))
-        base_entry.author = user
-    else:
-        base_entry = BaseEntry()
-
-    base_entry.town_hall_level = int(request.forms.get('level'))
-
-    # do the image processing
-    base_entry.image = create_base_image(base_img, base_entry.town_hall_level)
-
-    base_entry.random = random.randrange(0, math.pow(2, 52) - 1)
-    base_entry.put()
-
-    redirect('/display/{}'.format(base_entry.key.urlsafe()))
-
-
-@get('/display/:base_id')
-def display_one_base(base_id):
-    base = ndb.Key(urlsafe=base_id).get()
-    if not base:
-        abort(404, 'base not found')
-
-    user = users.get_current_user()
-    template_values = {
-        'user': True,
-        'url': '/',
-        'image': base64.b64encode(base.image),
-        'score': int(base.score * 100)
-    }
-    if not user:
-        template_values['user'] = False
-
-    return respond(JINJA_ENV.get_template('display_one_base.html'), template_values)
-
-
-@get('/logout')
-def log_out():
-    redirect(users.create_logout_url('/'))
-
-
-@get('/login')
-def log_in():
-    redirect(users.create_login_url('/'))
 
 
 def respond(template_file, params):

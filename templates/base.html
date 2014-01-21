@@ -40,45 +40,6 @@
   <body>
 
   <div class="container">
-    <nav class="navbar navbar-default" role="navigation">
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-          <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a class="navbar-brand" href="#">Clash or Next! (Beta)</a>
-      </div>
-      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-        <ul class="nav navbar-nav">
-          {% if url == '/' %}
-            <li class="active"><a href="/">Clash</a></li>
-          {% else %}
-            <li><a href="/">Clash</a></li>
-          {% endif %}
-          {% if url == '/upload' %}
-            <li class="active"><a href="/upload">Upload</a></li>
-          {% else %}
-            <li><a href="/upload">Upload</a></li>
-          {% endif %}
-          {% if user %}
-            {% if url == '/base' %}
-              <li class="active"><a href="/base">My Bases</a></li>
-            {% else %}
-              <li><a href="/base">My Bases</a></li>
-            {% endif %}
-          {% endif %}
-        </ul>
-        <ul class="nav navbar-nav navbar-right">
-          {% if user %}
-              <li><a href="/logout">Log Out</a></li>
-          {% else %}
-              <li><a href="/login">Log in</a></li>
-          {% endif %}
-        </ul>
-      </div>
-    </nav>
       {% block body %} {%endblock%}
   </div> <!-- /container -->
 

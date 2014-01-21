@@ -1,18 +1,31 @@
 from google.appengine.ext import ndb
 
 
-class Submission(ndb.Model):
-    author = ndb.UserProperty()
-    date = ndb.DateTimeProperty(auto_now_add=True)
-    games_played = ndb.IntegerProperty(default=0)
-    ranking = ndb.IntegerProperty(default=1400)
-    active = ndb.BooleanProperty(default=True)
-    files = ndb.BlobProperty()
-
-
 class Game(ndb.Model):
+    TEAM_A = 'teamA'
+    TEAM_B = 'teamB'
+    WINNER = 'winner'
+    ROUND = 'round'
+    MAP = 'map'
+
+
     date = ndb.DateTimeProperty(auto_now_add=True)
-    home_player = ndb.UserProperty()
-    away_player = ndb.UserProperty()
-    winner = ndb.UserProperty()
-    game_file = ndb.BlobProperty()
+    map = ndb.StringProperty()
+    team_a = ndb.StringProperty()
+    team_b = ndb.StringProperty()
+    winner = ndb.StringProperty()
+    round = ndb.IntegerProperty()
+
+    def to_json(self):
+        return {
+            self.MAP: self.map,
+            self.TEAM_A: self.team_a,
+            self.TEAM_B: self.team_b,
+            self.WINNER: self.winner,
+            self.ROUND: self.round
+        }
+
+
+class Team(ndb.Model):
+    name = ndb.StringProperty()
+    elo = ndb.IntegerProperty(default=1600)

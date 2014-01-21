@@ -12,7 +12,7 @@ def calculate_new_elo(elo, opponent_elo, win):
 
 
 def _calc_expected(elo, opponent_elo):
-    return 1.0/(1.0 + 10.0 * (opponent_elo - elo)/400.0)
+    return 1.0/(1.0 + math.pow(10.0, (opponent_elo - elo)/400.0))
 
 
 def _updated_elo(elo, expected, win):
