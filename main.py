@@ -1,14 +1,9 @@
-import base64
-import datetime
 import logging
 import jinja2
-import math
+import json
 import os
-import random
 
 
-from google.appengine.api import users
-from google.appengine.ext import ndb
 from google.appengine.ext.webapp.util import run_wsgi_app
 
 
@@ -25,21 +20,24 @@ JINJA_ENV = jinja2.Environment(
     extensions=['jinja2.ext.autoescape'])
 
 def _get_game(team_a, team_b, map):
-    games = Game.query().filter(Game.team_a, team_a).filter(Game.team_b, team_b).filter(Game.map, map).fetch(10)
-    if not games.length:
+    logging.info('get_game: {}, {}, {}'.format(team_a, team_b, map))
+    games = Game.query().filter(Game.team_a == team_a).filter(Game.team_b == team_b).filter(Game.map == map).fetch(10)
+    if not len(games):
         return None
 
-    if games.length == 1:
+    if len(games) == 1:
         return games[0]
 
-    if games.length > 1:
+    if len(games) > 1:
         logging.error("Found more than 1 game for {} vs {} on {}".format(team_a, team_b, map))
         return games[0]
 
 def _create_or_get_team(team_name):
-    team = Team.query(Team.name, team_name).get()
+    logging.info('create_or_get_team: {}'.format(team_name))
+    team = Team.query().filter(Team.name == team_name).get()
     if not team:
         team = Team(name = team_name)
+    logging.info('returning {}'.format(team))
     return team
 
 
@@ -57,20 +55,26 @@ def _create_and_save_game(team_a, team_b, map, winner, round):
         round=round,
         map=map
     )
-    ndb.put_multi([game, team_a_team, team_a_team])
+    logging.info('about to put {}, {} and {}'.format(game, team_a_team, team_b_team))
+    game.put()
+    team_a_team.put()
+    team_b_team.put()
 
 
 @get('/game/')
 def display_game():
-    team_a = request.query.team_a
-    team_b = request.query.team_b
-    map = request.query.map
+    team_a = request.query.get(Game.TEAM_A)
+    team_b = request.query.get(Game.TEAM_B)
+    map = request.query.get(Game.MAP)
 
-    game = _get_game(team_a, team_b, map)
+    game = None
+    if team_a and team_b and map:
+        game = _get_game(team_a, team_b, map)
 
     if game:
         response.headers['Content-Type'] = 'application/json'
-        response.body = game.to_json()
+        logging.info(game.to_json())
+        response.body = json.dumps(game.to_json())
         return response
     else:
         abort(404, 'game not found')
@@ -81,7 +85,8 @@ def save_game():
     team_b = request.query.get(Game.TEAM_B)
     map = request.query.get(Game.MAP)
     winner = request.query.get(Game.WINNER)
-    round = request.query.get(Game.ROUND)
+    round = int(request.query.get(Game.ROUND))
+    logging.info('{},{},{},{},{}'.format(team_a, team_b, map, winner, round))
     game = _get_game(team_a, team_b, map)
     if not game:
         _create_and_save_game(team_a, team_b, map, winner, round)
@@ -90,10 +95,10 @@ def save_game():
 @get('/')
 def display_teams():
 
-    teams = Team.query().order(Team.elo, Team.name).fetch(100)
+    teams = Team.query().order(-Team.elo, Team.name).fetch(100)
 
     template_values = {
-        teams: teams
+        'teams': teams
     }
 
     return respond(JINJA_ENV.get_template('display_teams.html'), template_values)
