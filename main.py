@@ -189,7 +189,7 @@ def _get_team_win_loss(team):
     return [_get_team_name_link(team.name), team.elo, game_count, win_count, per]
 
 
-def _add_sort_order_to_headers(url, headers, qsp):
+def _add_sort_order_to_headers(url, headers, qsp={}):
     for i in range(len(headers)):
         qsp_str = ''
         for key in qsp.keys():
