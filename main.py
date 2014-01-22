@@ -199,9 +199,11 @@ def _add_sort_order_to_headers(url, headers, qsp):
 
 
 def _sort_data_list(sort_order, data_list):
-    if not sort_order:
+    if sort_order is None:
         return data_list
     sort_order = int(sort_order)
+    if sort_order == 0:
+        return data_list
 
     data_list.sort(key=lambda data: data[sort_order])
     data_list.reverse()
