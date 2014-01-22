@@ -114,6 +114,7 @@ def _get_team_map_win_loss(team, map):
 
 @get('/team/')
 def display_team():
+    sort_order = request.query.get('sort')
     team_name = request.query.get('team')
     team = Team.query().filter(Team.name == team_name).get()
     if not team:
@@ -123,8 +124,11 @@ def display_team():
     for map in MAPS:
         data_list.append(_get_team_map_win_loss(team, map))
 
+
+    data_list = _sort_data_list(sort_order, data_list)
+
     template_values = {
-        'headers': ['Map', 'Games', 'Wins', 'Percentage'],
+        'headers': _add_sort_order_to_headers('/team/', ['Map', 'Games', 'Wins', 'Percentage'], {'team' :team_name}),
         'data_list': data_list
     }
 
@@ -185,26 +189,35 @@ def _get_team_win_loss(team):
     return [_get_team_name_link(team.name), team.elo, game_count, win_count, per]
 
 
-def _add_sort_order_to_headers(url, headers):
+def _add_sort_order_to_headers(url, headers, qsp):
     for i in range(len(headers)):
-        headers[i] = '<a href={}?sort={}>{}</a>'.format(url, i, headers[i])
+        qsp_str = ''
+        for key in qsp.keys():
+            qsp_str = '{}&{}={}'.format(qsp_str, key, qsp.get(key))
+        headers[i] = '<a href={}?sort={}{}>{}</a>'.format(url, i, qsp_str, headers[i])
     return headers
+
+
+def _sort_data_list(sort_order, data_list):
+    if sort_order is None:
+        sort_order = 0
+    sort_order = int(sort_order)
+
+    data_list.sort(key=lambda data: data[sort_order])
+    data_list.reverse()
+    return data_list
 
 
 @get('/teams/')
 def display_teams():
     sort_order = request.query.get('sort')
-    if sort_order is None:
-        sort_order = 0
-    sort_order = int(sort_order)
 
     teams = Team.query().order(-Team.elo, Team.name).fetch(100)
     data_list = []
     for team in teams:
         data_list.append(_get_team_win_loss(team))
 
-    data_list.sort(key=lambda data: data[sort_order])
-    data_list.reverse()
+    data_list = _sort_data_list(sort_order, data_list)
 
     template_values = {
         'headers': _add_sort_order_to_headers('/teams/', ['Team', 'ELO', 'Games', 'Wins', 'Percentage']),
@@ -215,6 +228,7 @@ def display_teams():
 
 @get('/')
 def display_teams():
+    sort_order = request.query.get('sort')
 
     teams = Team.query().order(-Team.elo, Team.name).fetch(100)
 
@@ -222,8 +236,10 @@ def display_teams():
     for team in teams:
         data_list.append([_get_team_name_link(team.name), team.elo])
 
+    data_list = _sort_data_list(sort_order, data_list)
+
     template_values = {
-        'headers': ['Team', 'ELO'],
+        'headers': _add_sort_order_to_headers('/', ['Team', 'ELO']),
         'data_list': data_list
     }
 
