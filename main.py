@@ -16,7 +16,7 @@ from models import Game, Team
 from elo import calculate_new_elo
 
 
-MAPS = ['backdoor.xml', 'bakedpotato.xml', 'blocky.xml', 'castles.xml', 'desolation.xml', 'divide.xml', 'donut.xml', 'flagsoftheworld.xml', 'flytrap.xml', 'friendly.xml', 'fuzzy.xml', 'itsatrap.xml', 'magnetism.xml', 'meander.xml', 'neighbors.xml', 'onramp.xml', 'overcast.xml', 'reticle.xml', 'rushlane.xml', 'siege.xml', 'smiles.xml', 'steamedbuns.xml', 'stitch.xml', 'sweetspot.xml', 'temple.xml', 'terra.xml', 'traffic.xml', 'troll.xxl', 'valve.xml', 'ventilation.xml']
+MAPS = ['backdoor.xml', 'bakedpotato.xml', 'blocky.xml', 'castles.xml', 'desolation.xml', 'divide.xml', 'donut.xml', 'flagsoftheworld.xml', 'flytrap.xml', 'friendly.xml', 'fuzzy.xml', 'itsatrap.xml', 'magnetism.xml', 'meander.xml', 'neighbors.xml', 'onramp.xml', 'overcast.xml', 'reticle.xml', 'rushlane.xml', 'siege.xml', 'smiles.xml', 'steamedbuns.xml', 'stitch.xml', 'sweetspot.xml', 'temple.xml', 'terra.xml', 'traffic.xml', 'troll.xml', 'valve.xml', 'ventilation.xml']
 
 
 JINJA_ENV = jinja2.Environment(
