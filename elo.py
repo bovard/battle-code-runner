@@ -19,5 +19,5 @@ def _updated_elo(elo, expected, win):
     won = 0
     if win:
         won = 1
-    return int(math.floor(elo + 32 * (won - expected)))
+    return int(round(elo + 32 * (won - expected)))
 
