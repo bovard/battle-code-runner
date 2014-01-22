@@ -185,18 +185,29 @@ def _get_team_win_loss(team):
     return [_get_team_name_link(team.name), team.elo, game_count, win_count, per]
 
 
+def _add_sort_order_to_headers(url, headers):
+    for i in range(len(headers)):
+        headers[i] = '<a href={}?sort={}>{}</a>'.format(url, i, headers[i])
+    return headers
+
+
 @get('/teams/')
 def display_teams():
+    sort_order = request.query.get('sort')
+    if sort_order is None:
+        sort_order = 0
+    sort_order = int(sort_order)
+
     teams = Team.query().order(-Team.elo, Team.name).fetch(100)
     data_list = []
     for team in teams:
         data_list.append(_get_team_win_loss(team))
 
-    #data_list.sort(key=lambda data: data[4])
-    #data_list.reverse()
+    data_list.sort(key=lambda data: data[sort_order])
+    data_list.reverse()
 
     template_values = {
-        'headers': ['Team', 'ELO', 'Games', 'Wins', 'Percentage'],
+        'headers': _add_sort_order_to_headers('/teams/', ['Team', 'ELO', 'Games', 'Wins', 'Percentage']),
         'data_list': data_list
     }
     return respond(JINJA_ENV.get_template('data_view.html'), template_values)

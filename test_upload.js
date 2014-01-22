@@ -19,7 +19,7 @@ function run() {
     console.log(teamA, teamB, map);
     request.post(
         {
-            uri: 'http://s-dot-charming-bolt-370.appspot.com/game/',
+            uri: 'http://localhost:9080/game/',
             qs: {
                 map: map,
                 teamA: teamA,
