@@ -1,5 +1,4 @@
 import logging
-import math
 import jinja2
 import json
 import os
@@ -129,7 +128,8 @@ def display_team():
 
     template_values = {
         'headers': _add_sort_order_to_headers('/team/', ['Map', 'Games', 'Wins', 'Percentage'], {'team' :team_name}),
-        'data_list': data_list
+        'data_list': data_list,
+        'color': 3
     }
 
     return respond(JINJA_ENV.get_template('data_view.html'), template_values)

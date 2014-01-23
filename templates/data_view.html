@@ -9,25 +9,33 @@
 
 {%block body%}
 
-<div class="row">
-{% for header in headers %}
+{% if color is undefined %}
+    {% set color = -1 %}
+{% endif %}
 
-    <div class="col-xs-1 col-sm-1 col-md-1">
-        <div class="text-center text-primary">{{header}}</div>
-    </div>
-
-{% endfor %}
-</div>
+<table class="table table-bordered, table-hover">
+    <thead>
+    <tr>
+        {% for header in headers %}
+            <th class="">{{header}}</th>
+        {% endfor %}
+        </tr>
+    </thead>
 {% for data_row in data_list %}
-    <div class="row">
+    {% if color < 0 %}
+        <tr>
+    {% elif data_row[color] < 25 %}
+        <tr class="danger">
+    {% elif data_row[color] < 50 %}
+        <tr class="warning">
+    {% elif data_row[color] > 75 %}
+        <tr class="success">
+    {% else %}
+         <tr>
+    {% endif %}
     {% for data in data_row %}
-
-        <div class="col-xs-1 col-sm-1 col-md-1">
-            <div class="text-center">{{ data }}</div>
-        </div>
-
-
+        <td>{{ data }}</td>
     {% endfor %}
-    </div>
+    </tr>
 {% endfor %}
 {%endblock%}
