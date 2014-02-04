@@ -14,9 +14,7 @@ from lib.bottle import abort, post, get, request, error, debug, redirect, respon
 from models import Game, Team
 from elo import calculate_new_elo
 
-
-MAPS = ['backdoor.xml', 'bakedpotato.xml', 'blocky.xml', 'castles.xml', 'desolation.xml', 'divide.xml', 'donut.xml', 'flagsoftheworld.xml', 'flytrap.xml', 'friendly.xml', 'fuzzy.xml', 'itsatrap.xml', 'magnetism.xml', 'meander.xml', 'neighbors.xml', 'onramp.xml', 'overcast.xml', 'reticle.xml', 'rushlane.xml', 'siege.xml', 'smiles.xml', 'steamedbuns.xml', 'stitch.xml', 'sweetspot.xml', 'temple.xml', 'terra.xml', 'traffic.xml', 'troll.xml', 'valve.xml', 'ventilation.xml']
-
+MAPS = [ 'almsman.xml', 'backdoor.xml', 'bakedpotato.xml', 'blocky.xml', 'cadmic.xml', 'castles.xml', 'corners.xml', 'desolation.xml', 'divide.xml', 'donut.xml', 'fenced.xml', 'filling.xml', 'flagsoftheworld.xml', 'flytrap.xml', 'friendly.xml', 'fuzzy.xml', 'gilgamesh.xml', 'highschool.xml', 'highway.xml', 'house.xml', 'hydratropic.xml', 'hyperfine.xml', 'intermeningeal.xml', 'itsatrap.xml', 'librarious.xml', 'magnetism.xml', 'meander.xml', 'moba.xml', 'moo.xml', 'neighbors.xml', 'oasis.xml', 'onramp.xml', 'overcast.xml', 'pipes.xml', 'race.xml', 'reticle.xml', 'rushlane.xml', 's1.xml', 'siege.xml', 'smiles.xml', 'spots.xml', 'spyglass.xml', 'steamedbuns.xml', 'stitch.xml', 'sweetspot.xml', 'temple.xml', 'terra.xml', 'traffic.xml', 'troll.xml', 'unself.xml', 'valve.xml', 'ventilation.xml']
 
 JINJA_ENV = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__) + '/templates'),
